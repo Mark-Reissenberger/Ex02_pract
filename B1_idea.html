@@ -25,10 +25,11 @@
         experiment!</h2>
     <div id="stimulus"></div>
     <p id="time"></p>
-    <p id="count"></p>
+    <p id="errorRate"></p>
     <p id="mean"></p>
     <p id="sd"></p>
     <p id="errorCount"></p>
+    <p id="correlation"></p>
     <script>
         // if true, the experiment is currently active
         let experimentActive = false;
@@ -55,9 +56,10 @@
         // DOM elements
         let titleElement = document.getElementById('title');
         let timeElement = document.getElementById('time');
-        let countElement = document.getElementById('count');
+        let errorRateElement = document.getElementById('errorRate');
         let meanElement = document.getElementById('mean');
         let stdDevElement = document.getElementById('sd');
+        let correlationElement = document.getElementById('correlation');
         let instructionElement = document.getElementById('instruction');
         let stimulusElement = document.getElementById('stimulus');
         stimulusElement.style.opacity = 0;
@@ -77,9 +79,20 @@
             return Math.sqrt(squareSum / data.length);
         }
 
+        function getCorrelation(data1, data2) {
+            let correlation = 0;
+            let data1Mean = getMean(data1);
+            let data2Mean = getMean(data2);
+            let standardDeviation1 = getStandardDeviation(data1);
+            let standardDeviation2 = getStandardDeviation(data2);
+            for (let index in data1) correlation += (data1[index] - data1Mean) * (data2[index] - data2Mean);
+            correlation /= data1.length;
+            return correlation/(standardDeviation1*standardDeviation2);
+        }
+
         function clearResults() {
             timeElement.textContent = '';
-            countElement.textContent = '';
+            errorRateElement.textContent = '';
             meanElement.textContent = '';
             stdDevElement.textContent = '';
         }
@@ -87,10 +100,12 @@
         function showResults() {
             let meanDeltaTime = getMean(times);
             let stdDev = getStandardDeviation(times);
+            let correlation = getCorrelation(times, stimulusPositions);
 
-            countElement.textContent = 'Count: ' + times.length;
+            errorRateElement.textContent = 'Error Rate: ' + errorCount / (times.length + errorCount) + ' %';
             meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
-            stdDevElement.textContent = 'SD: ' + Math.round(stdDev) + ' ms';
+            stdDevElement.textContent = 'Standard Deviation: ' + Math.round(stdDev) + ' ms';
+            correlationElement.textContent = 'Correlation: ' + correlation;
         }
 
         function getRandomPosition(element) {
