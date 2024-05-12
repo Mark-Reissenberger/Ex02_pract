@@ -124,10 +124,10 @@
         setStimulusColor('black');
 
         function startTestTrial() {
+            clearTimeout(testStimulusTimeout);
             // reset the stimulus
             stimulusElement.style.opacity = 0;
             stimulusIsVisible = false;
-            errorCount = 0;  // Reset error count for each trial
 
             // schedule the stimulus to appear after a random amount of time
             let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
@@ -135,16 +135,6 @@
                 setStimulusPosition();  // Set random position before color change
                 fadeIn();
             }, timeToWaitInSeconds * 1000);
-
-            let stimulusRect = stimulusElement.getBoundingClientRect();  // Get element dimensions and position
-            let centerX = window.innerWidth / 2;
-            let centerY = window.innerHeight / 2;
-            let stimulusCenterX = stimulusRect.left + stimulusRect.width / 2;
-            let stimulusCenterY = stimulusRect.top + stimulusRect.height / 2;
-            let distance = Math.sqrt(Math.pow(stimulusCenterX - centerX, 2) + Math.pow(stimulusCenterY - centerY, 2));
-            stimulusPositions.push(distance);  // Store the calculated distance
-
-
         }
 
         function fadeIn() {
@@ -170,17 +160,21 @@
 
         function recordStimulusReactionTime() {
             let deltaTime = Date.now() - stimulusTimestamp;
-            if (deltaTime >= 0) {  // Check if reaction time is valid (not before stimulus became visible)
-                times.push(deltaTime);
-                timeElement.textContent = deltaTime + ' ms';
-            } else {
-                errorCount++;  // Increment error count for premature key press
-                errorCountElement.textContent = 'Errors: ' + errorCount;
-            }
+            times.push(deltaTime);
+            timeElement.textContent = deltaTime + ' ms';
+
+            let stimulusRect = stimulusElement.getBoundingClientRect();  // Get element dimensions and position
+            let centerX = window.innerWidth / 2;
+            let centerY = window.innerHeight / 2;
+            let stimulusCenterX = stimulusRect.left + stimulusRect.width / 2;
+            let stimulusCenterY = stimulusRect.top + stimulusRect.height / 2;
+            let distance = Math.sqrt(Math.pow(stimulusCenterX - centerX, 2) + Math.pow(stimulusCenterY - centerY, 2));
+            stimulusPositions.push(distance);  // Store the calculated distance
         }
 
 
         function startExperiment() {
+            errorCount = 0;
             stimulusElement.style.display = 'inline';
             clearResults(); // clear results of any previous tests
             titleElement.style.display = 'none';
@@ -194,7 +188,7 @@
 
         function stopExperiment() {
             stimulusElement.style.display = 'none';
-            if (times.length == 30) {
+            if (times.length + errorCount == 30) {
                 instructionElement.textContent = "The experiment has concluded! Please copy the text block below this message and send it to us on WhatsApp!";
                 experimentConcluded = true;
             } else {
@@ -218,13 +212,20 @@
                         startExperiment();
                     }
                     return;
-                }
-
-                if (stimulusIsVisible) {
+                } else if (stimulusIsVisible) {
                     // record reaction time
                     recordStimulusReactionTime();
                     // start next trial
-                    if (times.length < 30) {
+                    if (times.length + errorCount < 30) {
+                        startTestTrial();
+                    } else {
+                        stopExperiment();
+                    }
+                } else {
+                    errorCount++;
+                    console.log(errorCount);
+                    // start next trial
+                    if (times.length + errorCount < 30) {
                         startTestTrial();
                     } else {
                         stopExperiment();
