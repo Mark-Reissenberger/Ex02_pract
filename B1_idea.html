@@ -24,7 +24,6 @@
         automatically conclude after that. Press 'a' to cancel experiment prematurely. Press space to start the
         experiment!</h2>
     <div id="stimulus"></div>
-    <p id="time"></p>
     <p id="errorRate"></p>
     <p id="mean"></p>
     <p id="sd"></p>
@@ -55,7 +54,6 @@
 
         // DOM elements
         let titleElement = document.getElementById('title');
-        let timeElement = document.getElementById('time');
         let errorRateElement = document.getElementById('errorRate');
         let meanElement = document.getElementById('mean');
         let stdDevElement = document.getElementById('sd');
@@ -91,10 +89,10 @@
         }
 
         function clearResults() {
-            timeElement.textContent = '';
             errorRateElement.textContent = '';
             meanElement.textContent = '';
             stdDevElement.textContent = '';
+            correlationElement.textContent = '';
         }
 
         function showResults() {
@@ -176,7 +174,6 @@
         function recordStimulusReactionTime() {
             let deltaTime = Date.now() - stimulusTimestamp;
             times.push(deltaTime);
-            timeElement.textContent = deltaTime + ' ms';
 
             let stimulusRect = stimulusElement.getBoundingClientRect();  // Get element dimensions and position
             let centerX = window.innerWidth / 2;
