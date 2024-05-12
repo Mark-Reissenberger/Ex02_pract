@@ -16,7 +16,7 @@ body {
     </head>
    <body>
         <h1 id="title">User Study</h1>
-        <h2 id="instruction">Press space to start!</h2>
+        <h2 id="instruction"> Press space ONLY when a square appears! Please go through all 30 trials. The experiment will automatically conclude after that. Press 'a' to cancel experiment prematurely. Press space to start the experiment!</h2>
         <div id="stimulus"></div>
         <p id="time"></p>
         <p id="count"></p>
@@ -40,15 +40,21 @@ let testStimulusTimeout;
 // recorded reaction times in milliseconds
 let times = [];
 
+let stimulusPositions = [];
+
 let backgroundColor = 'black';
 
+let experimentConcluded = false;
+
 // DOM elements
+let titleElement = document.getElementById('title');
 let timeElement = document.getElementById('time');
 let countElement = document.getElementById('count');
 let meanElement = document.getElementById('mean');
 let stdDevElement = document.getElementById('sd');
 let instructionElement = document.getElementById('instruction');
 let stimulusElement = document.getElementById('stimulus');
+stimulusElement.style.opacity = 0;
 
 
 
@@ -109,9 +115,11 @@ function setStimulusColor(newColor) {
     stimulusElement.style.backgroundColor = newColor;
 }
 
+setStimulusColor('black');
+
 function startTestTrial() {
     // reset the stimulus
-    setStimulusColor('white');
+    stimulusElement.style.opacity = 0;
     stimulusIsVisible = false;
     errorCount = 0;  // Reset error count for each trial
 
@@ -119,10 +127,9 @@ function startTestTrial() {
     let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
     testStimulusTimeout = setTimeout(function() {
         setStimulusPosition();  // Set random position before color change
-        graduallyChangeColor();
+        fadeIn();
     }, timeToWaitInSeconds * 1000);
 
-    let stimulusElement = document.getElementById('stimulus');
     let stimulusRect = stimulusElement.getBoundingClientRect();  // Get element dimensions and position
     let centerX = window.innerWidth / 2;
     let centerY = window.innerHeight / 2;
@@ -134,22 +141,24 @@ function startTestTrial() {
 
 }
 
-function graduallyChangeColor() {
+function fadeIn() {
     stimulusIsVisible = true;  // Mark stimulus as visible when color change starts
     stimulusTimestamp = Date.now();
 
 
     // Animate the color change from black to match the background color (assumed to be white)
-    setStimulusColor('rgba(0, 0, 0, 0.01)');  // Start with near transparent black
     let colorChangeDuration = 2000;  // Adjust as needed (in milliseconds)
-    let steps = 10;  // Number of animation steps
+    let steps = 100;  // Number of animation steps
 
-    for (let i = 0; i < steps; i++) {
-        setTimeout(() => {
-            let alpha = (i + 1) / steps;
-            setStimulusColor(`rgba(0, 0, 0, ${alpha})`);
+    stimulusElement.style.opacity = 1/steps;
+    let intervalID = setInterval(increaseOpacity, colorChangeDuration/(steps-1));
 
-        }, i * (colorChangeDuration / steps));
+    function increaseOpacity() {
+        if(stimulusIsVisible && stimulusElement.style.opacity < 1) {
+            stimulusElement.style.opacity = Math.min(parseFloat(stimulusElement.style.opacity) + 1/steps, 1);
+        } else {
+            clearInterval(intervalID);
+        }
     }
 }
 
@@ -164,16 +173,12 @@ function recordStimulusReactionTime() {
     }
 }
 
-function showStimulus() {
-    setStimulusColor('red');
-    stimulusIsVisible = true;
-    stimulusTimestamp = Date.now();
-}
-
 
 function startExperiment() {
+    stimulusElement.style.display = 'inline';
     clearResults(); // clear results of any previous tests
-    instructionElement.textContent = "Press space when the color changes! Press 'a' for results!";
+    titleElement.style.display = 'none';
+    instructionElement.style.display = 'none';
 
     // reset data and start tests
     times = [];
@@ -182,13 +187,19 @@ function startExperiment() {
 }
 
 function stopExperiment() {
+    stimulusElement.style.display = 'none';
+    if(times.length == 30) {
+        instructionElement.textContent = "The experiment has concluded! Please copy the text block below this message and send it to us on WhatsApp!";
+        experimentConcluded = true;
+    } else {
+        instructionElement.textContent = "The experiment has been cancelled prematurely! Please press space to restart!";
+    }
+    instructionElement.style.display = 'inline';
     // cancel any ongoing tests
     clearTimeout(testStimulusTimeout);
     stimulusIsVisible = false;
     experimentActive = false;
 
-    // reset instruction and show results
-    instruction.textContent = 'Press space to start!';
     showResults();
 }
 
@@ -197,7 +208,9 @@ window.addEventListener('keydown', (event) => {
         // the user pressed the space key
         if (!experimentActive) {
             // start the experiment if it wasn't active
-            startExperiment();
+            if(!experimentConcluded) {
+                startExperiment();
+            }
             return;
         }
 
@@ -205,16 +218,17 @@ window.addEventListener('keydown', (event) => {
             // record reaction time
             recordStimulusReactionTime();
             // start next trial
-            startTestTrial();
+            if (times.length < 30) {
+                startTestTrial();
+            } else {
+                stopExperiment();
+            }
         }
     } else if (event.key === 'a') {
         if (experimentActive) {
             // stop the experiment and show results
             stopExperiment();
         }
-    }  else if (times.length > 29) {
-        // ...
-        stopExperiment();
     }
 });
       </script>
