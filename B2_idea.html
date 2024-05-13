@@ -19,9 +19,9 @@
 
 <body>
     <h1 id="title">User Study</h1>
-    <h2 id="instruction"> Press 'space' ONLY when a square appears! Please go through all 30 trials. The experiment will
-        automatically conclude after that. If a triangle appears you can skip it by pressing 'f'. Press 'a' to cancel
-        experiment prematurely. Press space to start the experiment!</h2>
+    <h2 id="instruction"> Press 'space' ONLY when a square appears! Please go through all 30 trials (only counting the
+        squares). The experiment willautomatically conclude after that. If a triangle appears you can skip it by
+        pressing 'f'. Press 'a' to cancel experiment prematurely. Press space to start the experiment!</h2>
     <div id="stimulus"></div>
     <p id="errorRate"></p>
     <p id="mean"></p>
@@ -128,7 +128,7 @@
 
         function recordStimulusReactionTime() {
             let deltaTime = Date.now() - stimulusTimestamp;
-            if(stimulusElement.style.backgroundColor = 'purple') {
+            if (stimulusElement.style.backgroundColor = 'purple') {
                 purpleTimes.push(deltaTime);
             } else {
                 orangeTimes.push(deltaTime);
@@ -188,7 +188,7 @@
                         stopExperiment();
                     }
                 } else {
-                    if(stimulusElement.style.backgroundColor == 'purple') {
+                    if (stimulusElement.style.backgroundColor == 'purple') {
                         errorCountPurple++;
                     } else {
                         errorCountOrange++;
@@ -206,7 +206,7 @@
                     stopExperiment();
                 }
             } else if (event.key === 'f') {
-                if(stimulusIsVisible && stimulusElement.style.clipPath == triangleString) {
+                if (stimulusIsVisible && stimulusElement.style.clipPath == triangleString) {
                     clearTimeout(testStimulusTimeout);
                     startTestTrial(false);
                 }
