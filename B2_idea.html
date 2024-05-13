@@ -123,6 +123,9 @@
                 stimulusElement.style.opacity = 1;
                 stimulusIsVisible = true;
                 stimulusTimestamp = Date.now();
+                if(stimulusElement.style.clipPath == triangleString) {
+                    testStimulusTimeout = setTimeout(startTestTrial, (Math.random() * 4 + 2) * 1000, false);
+                }
             }, timeToWaitInSeconds * 1000);
         }
 
