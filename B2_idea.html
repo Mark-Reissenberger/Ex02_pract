@@ -11,7 +11,6 @@
         #stimulus {
             height: 40px;
             width: 40px;
-            background-color: purple;
             position: absolute;
             /* Make the element absolutely positioned */
         }
@@ -53,7 +52,7 @@
 
         let stimulusPositions = [];
 
-        let backgroundColor = 'black';
+        let backgroundColor = 'transparent';
 
         let experimentConcluded = false;
 
@@ -146,14 +145,16 @@
 
         setStimulusColor('black');
 
-        function startTestTrial() {
+        function startTestTrial(wait = true) {
             clearTimeout(testStimulusTimeout);
             // reset the stimulus
             stimulusElement.style.opacity = 0;
             stimulusIsVisible = false;
-
-            // schedule the stimulus to appear after a random amount of time
-            let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
+            let timeToWaitInSeconds = 0;
+            if (wait) {
+                // schedule the stimulus to appear after a random amount of time
+                timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
+            }
             testStimulusTimeout = setTimeout(function () {
                 setStimulusPosition();  // Set random position before color change
                 fadeIn();
