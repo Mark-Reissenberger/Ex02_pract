@@ -45,6 +45,12 @@
 
         // recorded reaction times in milliseconds
         let times = [];
+        let purpleTimes = [];
+        let orangeTimes = [];
+
+        function times() {
+            return purpleTimes.concat(orangeTimes);
+        }
 
         let stimulusPositions = [];
 
@@ -101,11 +107,11 @@
         }
 
         function showResults() {
-            let meanDeltaTime = getMean(times);
-            let stdDev = getStandardDeviation(times);
-            let correlation = getCorrelation(times, stimulusPositions);
+            let meanDeltaTime = getMean(times());
+            let stdDev = getStandardDeviation(times());
+            let correlation = getCorrelation(times(), stimulusPositions);
 
-            errorRateElement.textContent = 'Error Rate: ' + errorCount() / (times.length + errorCount()) + ' %';
+            errorRateElement.textContent = 'Error Rate: ' + errorCount() / (times().length + errorCount()) + ' %';
             meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
             stdDevElement.textContent = 'Standard Deviation: ' + Math.round(stdDev) + ' ms';
             correlationElement.textContent = 'Correlation: ' + correlation;
@@ -191,15 +197,16 @@
 
 
         function startExperiment() {
-            errorCountPurple = 0;
-            errorCountOrange = 0;
             stimulusElement.style.display = 'inline';
             clearResults(); // clear results of any previous tests
             titleElement.style.display = 'none';
             instructionElement.style.display = 'none';
 
             // reset data and start tests
-            times = [];
+            errorCountPurple = 0;
+            errorCountOrange = 0;
+            purpleTimes = [];
+            orangeTimes = [];
             stimulusPositions = [];
             experimentActive = true;
             startTestTrial();
@@ -207,7 +214,7 @@
 
         function stopExperiment() {
             stimulusElement.style.display = 'none';
-            if (times.length + errorCount() == 30) {
+            if (times().length + errorCount() == 30) {
                 instructionElement.textContent = "The experiment has concluded! Please copy the text block below this message and send it to us on WhatsApp!";
                 experimentConcluded = true;
             } else {
@@ -235,7 +242,7 @@
                     // record reaction time
                     recordStimulusReactionTime();
                     // start next trial
-                    if (times.length + errorCount() < 30) {
+                    if (times().length + errorCount() < 30) {
                         startTestTrial();
                     } else {
                         stopExperiment();
@@ -243,7 +250,7 @@
                 } else {
                     errorCount++;
                     // start next trial
-                    if (times.length + errorCount() < 30) {
+                    if (times().length + errorCount() < 30) {
                         startTestTrial();
                     } else {
                         stopExperiment();
