@@ -50,6 +50,8 @@
             return purpleTimes.concat(orangeTimes);
         }
 
+        let triangleString = 'polygon(0% 100%, 50% 0%, 100% 100%)';
+
         let stimulusPositions = [];
 
         let backgroundColor = 'transparent';
@@ -156,8 +158,17 @@
                 timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
             }
             testStimulusTimeout = setTimeout(function () {
-                setStimulusPosition();  // Set random position before color change
-                fadeIn();
+                let stimulusSize = Math.random() * 200 + 100;
+                stimulusElement.style.width = stimulusSize;
+                stimulusElement.style.height = stimulusSize;
+                let windowWidth = window.innerWidth;
+                let windowHeight = window.innerHeight;
+                stimulusElement.style.left = windowWidth / 2 - stimulusSize / 2;
+                stimulusElement.style.top = windowHeight / 2 - stimulusSize / 2;
+                stimulusElement.style.backgroundColor = Math.random() < 0.5 ? 'purple' : 'orange';
+                stimulusElement.style.clipPath = Math.random() < 0.5 ? triangleString : 'unset';
+                stimulusElement.style.opacity = 1;
+                stimulusIsVisible = true;
             }, timeToWaitInSeconds * 1000);
         }
 
@@ -184,15 +195,11 @@
 
         function recordStimulusReactionTime() {
             let deltaTime = Date.now() - stimulusTimestamp;
-            times.push(deltaTime);
-
-            let stimulusRect = stimulusElement.getBoundingClientRect();  // Get element dimensions and position
-            let centerX = window.innerWidth / 2;
-            let centerY = window.innerHeight / 2;
-            let stimulusCenterX = stimulusRect.left + stimulusRect.width / 2;
-            let stimulusCenterY = stimulusRect.top + stimulusRect.height / 2;
-            let distance = Math.sqrt(Math.pow(stimulusCenterX - centerX, 2) + Math.pow(stimulusCenterY - centerY, 2));
-            stimulusPositions.push(distance);  // Store the calculated distance
+            if(stimulusElement.style.backgroundColor = 'purple') {
+                purpleTimes.push(deltaTime);
+            } else {
+                orangeTimes.push(deltaTime);
+            }
         }
 
 
@@ -238,7 +245,7 @@
                         startExperiment();
                     }
                     return;
-                } else if (stimulusIsVisible) {
+                } else if (stimulusIsVisible && stimulusElement.style.clipPath == 'unset') {
                     // record reaction time
                     recordStimulusReactionTime();
                     // start next trial
@@ -248,7 +255,11 @@
                         stopExperiment();
                     }
                 } else {
-                    errorCount++;
+                    if(stimulusElement.style.backgroundColor == 'purple') {
+                        errorCountPurple++;
+                    } else {
+                        errorCountOrange++;
+                    }
                     // start next trial
                     if (times().length + errorCount() < 30) {
                         startTestTrial();
@@ -260,6 +271,11 @@
                 if (experimentActive) {
                     // stop the experiment and show results
                     stopExperiment();
+                }
+            } else if (event.key === 'f') {
+                if(stimulusIsVisible && stimulusElement.style.clipPath == triangleString) {
+                    clearTimeout(testStimulusTimeout);
+                    startTestTrial(false);
                 }
             }
         });
