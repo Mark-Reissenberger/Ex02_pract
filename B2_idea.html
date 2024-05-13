@@ -169,6 +169,7 @@
                 stimulusElement.style.clipPath = Math.random() < 0.5 ? triangleString : 'unset';
                 stimulusElement.style.opacity = 1;
                 stimulusIsVisible = true;
+                stimulusTimestamp = Date.now();
             }, timeToWaitInSeconds * 1000);
         }
 
