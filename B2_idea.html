@@ -23,9 +23,19 @@
         squares). The experiment willautomatically conclude after that. If a triangle appears you can skip it by
         pressing 'f'. Press 'a' to cancel experiment prematurely. Press space to start the experiment!</h2>
     <div id="stimulus"></div>
+    <p id="total"></p>
     <p id="errorRate"></p>
     <p id="mean"></p>
     <p id="sd"></p>
+    <p id="purple"></p>
+    <p id="purpleErrorRate"></p>
+    <p id="purpleMean"></p>
+    <p id="purpleSd"></p>
+    <p id="orange"></p>
+    <p id="orangeErrorRate"></p>
+    <p id="orangeMean"></p>
+    <p id="orangeSd"></p>
+
     <script>
         // if true, the experiment is currently active
         let experimentActive = false;
@@ -58,9 +68,18 @@
 
         // DOM elements
         let titleElement = document.getElementById('title');
+        let totalElement = document.getElementById('total');
         let errorRateElement = document.getElementById('errorRate');
         let meanElement = document.getElementById('mean');
         let stdDevElement = document.getElementById('sd');
+        let purpleElement = document.getElementById('purple');
+        let purpleErrorRateElement = document.getElementById('purpleErrorRate');
+        let purpleMeanElement = document.getElementById('purpleMean');
+        let purpleStdDevElement = document.getElementById('purpleSd');
+        let orangeElement = document.getElementById('orange');
+        let orangeErrorRateElement = document.getElementById('orangeErrorRate');
+        let orangeMeanElement = document.getElementById('orangeMean');
+        let orangeStdDevElement = document.getElementById('orangeSd');
         let instructionElement = document.getElementById('instruction');
         let stimulusElement = document.getElementById('stimulus');
         stimulusElement.style.opacity = 0;
