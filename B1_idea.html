@@ -100,7 +100,7 @@
             let stdDev = getStandardDeviation(times);
             let correlation = getCorrelation(times, stimulusPositions);
 
-            errorRateElement.textContent = 'Error Rate: ' + errorCount / (times.length + errorCount) + ' %';
+            errorRateElement.textContent = 'Error Rate: ' + errorCount / (times.length + errorCount);
             meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
             stdDevElement.textContent = 'Standard Deviation: ' + Math.round(stdDev) + ' ms';
             correlationElement.textContent = 'Correlation: ' + correlation;
