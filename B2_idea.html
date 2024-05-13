@@ -114,9 +114,15 @@
             let meanDeltaTime = getMean(times());
             let stdDev = getStandardDeviation(times());
 
-            errorRateElement.textContent = 'Error Rate: ' + errorCount() / (times().length + errorCount());
-            meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
-            stdDevElement.textContent = 'Standard Deviation: ' + Math.round(stdDev) + ' ms';
+            errorRateElement.textContent = 'Total Error Rate: ' + errorCount() / (times().length + errorCount());
+            meanElement.textContent = 'Total Mean: ' + Math.round(getMean(times())) + ' ms';
+            stdDevElement.textContent = 'Total Standard Deviation: ' + Math.round(getStandardDeviation(times())) + ' ms';
+            purpleErrorRateElement.textContent = 'Purple Error Rate: ' + errorCountPurple / (purpleTimes.length + errorCountPurple);
+            purpleMeanElement.textContent = 'Purple Mean: ' + Math.round(getMean(purpleTimes)) + ' ms';
+            purpleStdDevElement.textContent = 'Purple Standard Deviation: ' + Math.round(getStandardDeviation(purpleTimes)) + ' ms';
+            orangeErrorRateElement.textContent = 'Orange Error Rate: ' + errorCountOrange / (orangeTimes.length + errorCountOrange);
+            orangeMeanElement.textContent = 'Orange Mean: ' + Math.round(getMean(orangeTimes)) + ' ms';
+            orangeStdDevElement.textContent = 'Orange Standard Deviation: ' + Math.round(getStandardDeviation(orangeTimes)) + ' ms';
         }
 
         function startTestTrial(wait = true) {
@@ -150,7 +156,7 @@
 
         function recordStimulusReactionTime() {
             let deltaTime = Date.now() - stimulusTimestamp;
-            if (stimulusElement.style.backgroundColor = 'purple') {
+            if (stimulusElement.style.backgroundColor == 'purple') {
                 purpleTimes.push(deltaTime);
             } else {
                 orangeTimes.push(deltaTime);
@@ -212,8 +218,10 @@
                 } else {
                     if (stimulusElement.style.backgroundColor == 'purple') {
                         errorCountPurple++;
+                        console.log(errorCountPurple + 'purple' + stimulusElement.style.backgroundColor);
                     } else {
                         errorCountOrange++;
+                        console.log(errorCountOrange + 'orange' +stimulusElement.style.backgroundColor);
                     }
                     // start next trial
                     if (times().length + errorCount() < 30) {
