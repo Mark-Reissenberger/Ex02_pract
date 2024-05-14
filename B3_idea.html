@@ -64,6 +64,8 @@
         "mex10.jpeg"
     ];
 
+    let allImages = mexicanImages.concat(germanImages, chineseImages);
+
     let shownImages = []; // Array to keep track of shown images
     let mistakes = { "mexican": 0, "german": 0, "chinese": 0 }; // Object to track mistakes per category
 
@@ -102,7 +104,6 @@
 
     // Function to load a random image
     function loadRandomImage() {
-        let allImages = mexicanImages.concat(germanImages, chineseImages);
         if (allImages.length === 0) {
             document.getElementById("randomImage").src = ""; // Clear the image
             alert("All images have been shown.");
@@ -113,32 +114,6 @@
         shownImages.push(randomImage);
         document.getElementById("randomImage").src = randomImage;
     }
-
-    // Function to handle key press events
-    document.addEventListener("keydown", function(event) {
-        let category;
-        // Check if d, f, or g is pressed
-        switch (event.key) {
-            case "d":
-                category = "german";
-                break;
-            case "f":
-                category = "chinese";
-                break;
-            case "g":
-                category = "mexican";
-                break;
-            default:
-                return;
-        }
-        // Check if the category of the displayed image matches the pressed key
-        let currentImage = document.getElementById("randomImage").src;
-        if (!currentImage.includes(category.substr(0, 2))) {
-            mistakes[category]++;
-        }
-        // Load a random image after key press
-        loadRandomImage();
-    });
 
     // Load a random image initially
     loadRandomImage();
@@ -218,6 +193,32 @@
         instruction.textContent = 'Press space to start!';
         showResults();
     }
+
+    // Function to handle key press events
+    document.addEventListener("keydown", function(event) {
+        let category;
+        // Check if d, f, or g is pressed
+        switch (event.key) {
+            case "d":
+                category = "german";
+                break;
+            case "f":
+                category = "chinese";
+                break;
+            case "g":
+                category = "mexican";
+                break;
+            default:
+                return;
+        }
+        // Check if the category of the displayed image matches the pressed key
+        let currentImage = document.getElementById("randomImage").src;
+        if (!currentImage.includes(category.substr(0, 2))) {
+            mistakes[category]++;
+        }
+        // Load a random image after key press
+        loadRandomImage();
+    });
 
     window.addEventListener('keydown', (event) => {
         if (event.key === ' ') {
