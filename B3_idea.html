@@ -23,8 +23,8 @@
 </head>
 
 <body>
-    <h1 id="title">User Study</h1>
-    <h2 id="instruction">Press space to start!</h2>
+    <h2 id="instruction">Press D for a german, f for a chinese and g for mexican food! There will be 30 different images
+        shown in total! Press space to start the experiment!</h2>
     <div id="stimulus">
         <img id="randomImage" src="" alt="Random Image">
     </div>
@@ -74,7 +74,8 @@
 
         let allImages = mexicanImages.concat(germanImages, chineseImages);
 
-        let shownImages = []; // Array to keep track of shown images
+        let currentImageCount = 0;
+
         let mistakes = { "mexican": 0, "german": 0, "chinese": 0 }; // Object to track mistakes per category
 
         // if true, the experiment is currently active
@@ -91,7 +92,8 @@
         let testStimulusTimeout;
 
         // recorded reaction times in milliseconds
-        let times = [];
+        let times = { "mexican": [], "german": [], "chinese": [] };
+
 
         // DOM elements
         let timeElement = document.getElementById('time');
@@ -100,6 +102,9 @@
         let stdDevElement = document.getElementById('sd');
         let instructionElement = document.getElementById('instruction');
         let stimulusElement = document.getElementById('stimulus');
+        let randomImageElement = document.getElementById('randomImage');
+
+        stimulusElement.style.visibility = 'hidden';
 
         // Function to shuffle an array (Fisher-Yates algorithm)
         function shuffleArray(array) {
@@ -109,22 +114,6 @@
             }
             return array;
         }
-
-        // Function to load a random image
-        function loadRandomImage() {
-            if (allImages.length === 0) {
-                document.getElementById("randomImage").src = ""; // Clear the image
-                alert("All images have been shown.");
-                return;
-            }
-            let randomIndex = Math.floor(Math.random() * allImages.length);
-            let randomImage = allImages.splice(randomIndex, 1)[0];
-            shownImages.push(randomImage);
-            document.getElementById("randomImage").src = randomImage;
-        }
-
-        // Load a random image initially
-        loadRandomImage();
 
         function getMean(data) {
             let sum = 0;
@@ -160,9 +149,14 @@
         }
 
         function startTestTrial() {
+            clearTimeout(testStimulusTimeout);
             // reset the stimulus
-            setStimulusColor('black');
+            stimulusElement.style.visibility = 'hidden';
             stimulusIsVisible = false;
+
+            randomImageElement.src = allImages[currentImageCount];
+            currentImageCount++;
+            console.log(allImages);
 
             // schedule the stimulus to appear after a random amount of time
             let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
@@ -170,23 +164,25 @@
         }
 
         function showStimulus() {
-            setStimulusColor('red');
+            stimulusElement.style.visibility = 'visible';
             stimulusIsVisible = true;
             stimulusTimestamp = Date.now();
         }
 
-        function recordStimulusReactionTime() {
+        function recordStimulusReactionTime(category) {
             let deltaTime = Date.now() - stimulusTimestamp;
-            times.push(deltaTime);
+            console.log('Accepted: ' + category);
+            times[category].push(deltaTime);
             timeElement.textContent = deltaTime + ' ms';
         }
 
         function startExperiment() {
+            shuffleArray(allImages);
             clearResults(); // clear results of any previous tests
-            instructionElement.textContent = "Press space to start the experiment! Press D for a german, f for a chinese and g for mexican food! Press 'a' for results!";
+            instructionElement.textContent = "D: German, F: Chinese, G: Mexican";
 
             // reset data and start tests
-            times = [];
+            let times = { "mexican": [], "german": [], "chinese": [] };
             experimentActive = true;
             startTestTrial();
         }
@@ -194,11 +190,11 @@
         function stopExperiment() {
             // cancel any ongoing tests
             clearTimeout(testStimulusTimeout);
+            stimulusElement.style.visibility = 'hidden';
             stimulusIsVisible = false;
-            experimentActive = false;
 
             // reset instruction and show results
-            instruction.textContent = 'Press space to start!';
+            instruction.textContent = 'The experiment has concluded! Please copy the text block below this message and send it to us on WhatsApp!';
             showResults();
         }
 
@@ -220,12 +216,19 @@
                     return;
             }
             // Check if the category of the displayed image matches the pressed key
-            let currentImage = document.getElementById("randomImage").src;
-            if (!currentImage.includes(category.substr(0, 2))) {
+            let currentImage = randomImageElement.src.split('/').pop();
+            console.log(currentImage);
+            if (!stimulusIsVisible || !currentImage.includes(category.substr(0, 2))) {
                 mistakes[category]++;
+                console.log('rejected ' + category + ', expected: ' + currentImage);
+            } else {
+                recordStimulusReactionTime(category);
             }
-            // Load a random image after key press
-            loadRandomImage();
+            if (currentImageCount < 30) {
+                startTestTrial();
+            } else {
+                stopExperiment();
+            }
         });
 
         window.addEventListener('keydown', (event) => {
@@ -236,20 +239,6 @@
                     startExperiment();
                     return;
                 }
-
-                if (stimulusIsVisible) {
-                    // record reaction time
-                    recordStimulusReactionTime();
-                    // start next trial
-                    startTestTrial();
-                }
-            } else if (event.key === 'a') {
-                if (experimentActive) {
-                    // stop the experiment and show results
-                    stopExperiment();
-                }
-            } else if (event.key === 'b') {
-                // ...
             }
         });
     </script>
