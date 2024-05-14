@@ -8,11 +8,9 @@
         }
 
         img {
-            width: 1500px;
-            /* Adjust width as needed */
-            height: auto;
+            height: 90%;
             /* Maintain aspect ratio */
-            max-height: 800px;
+            width: auto;
             /* Limit maximum height */
             display: block;
             /* Ensure each image starts on a new line */
@@ -28,10 +26,15 @@
     <div id="stimulus">
         <img id="randomImage" src="" alt="Random Image">
     </div>
-    <p id="time"></p>
-    <p id="count"></p>
-    <p id="mean"></p>
-    <p id="sd"></p>
+    <p id="germanErrorRate"></p>
+    <p id="germanMean"></p>
+    <p id="germanSd"></p>
+    <p id="chineseErrorRate"></p>
+    <p id="chineseMean"></p>
+    <p id="chineseSd"></p>
+    <p id="mexicanErrorRate"></p>
+    <p id="mexicanMean"></p>
+    <p id="mexicanSd"></p>
 
     <script>
 
@@ -94,12 +97,19 @@
         // recorded reaction times in milliseconds
         let times = { "mexican": [], "german": [], "chinese": [] };
 
+        let experimentConcluded = false;
+
 
         // DOM elements
-        let timeElement = document.getElementById('time');
-        let countElement = document.getElementById('count');
-        let meanElement = document.getElementById('mean');
-        let stdDevElement = document.getElementById('sd');
+        let germanErrorRateElement = document.getElementById('germanErrorRate');
+        let germanMeanElement = document.getElementById('germanMean');
+        let germanSdElement = document.getElementById('germanSd');
+        let chineseErrorRateElement = document.getElementById('chineseErrorRate');
+        let chineseMeanElement = document.getElementById('chineseMean');
+        let chineseSdElement = document.getElementById('chineseSd');
+        let mexicanErrorRateElement = document.getElementById('mexicanErrorRate');
+        let mexicanMeanElement = document.getElementById('mexicanMean');
+        let mexicanSdElement = document.getElementById('mexicanSd');
         let instructionElement = document.getElementById('instruction');
         let stimulusElement = document.getElementById('stimulus');
         let randomImageElement = document.getElementById('randomImage');
@@ -129,19 +139,27 @@
         }
 
         function clearResults() {
-            timeElement.textContent = '';
-            countElement.textContent = '';
-            meanElement.textContent = '';
-            stdDevElement.textContent = '';
+            germanErrorRateElement.textContent = '';
+            germanMeanElement.textContent = '';
+            germanSdElement.textContent = '';
+            chineseErrorRateElement.textContent = '';
+            chineseMeanElement.textContent = '';
+            chineseSdElement.textContent = '';
+            mexicanErrorRateElement.textContent = '';
+            mexicanMeanElement.textContent = '';
+            mexicanSdElement.textContent = '';
         }
 
         function showResults() {
-            let meanDeltaTime = getMean(times);
-            let stdDev = getStandardDeviation(times);
-
-            countElement.textContent = 'Count: ' + times.length;
-            meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
-            stdDevElement.textContent = 'SD: ' + Math.round(stdDev) + ' ms';
+            germanErrorRateElement.textContent = 'German Error Rate: ' + mistakes['german'] / 10;
+            germanMeanElement.textContent = 'German Mean: ' + Math.round(getMean(times['german'])) + ' ms';
+            germanSdElement.textContent = 'German SD: ' + Math.round(getStandardDeviation(times['german'])) + ' ms';
+            chineseErrorRateElement.textContent = 'Chinese Error Rate: ' + mistakes['chinese'] / 10;
+            chineseMeanElement.textContent = 'Chinese Mean: ' + Math.round(getMean(times['chinese'])) + ' ms';
+            chineseSdElement.textContent = 'Chinese SD: ' + Math.round(getStandardDeviation(times['chinese'])) + ' ms';
+            mexicanErrorRateElement.textContent = 'Mexican Error Rate: ' + mistakes['mexican'] / 10;
+            mexicanMeanElement.textContent = 'Mexican Mean: ' + Math.round(getMean(times['mexican'])) + ' ms';
+            mexicanSdElement.textContent = 'Mexican SD: ' + Math.round(getStandardDeviation(times['mexican'])) + ' ms';
         }
 
         function setStimulusColor(newColor) {
@@ -173,7 +191,6 @@
             let deltaTime = Date.now() - stimulusTimestamp;
             console.log('Accepted: ' + category);
             times[category].push(deltaTime);
-            timeElement.textContent = deltaTime + ' ms';
         }
 
         function startExperiment() {
@@ -190,16 +207,21 @@
         function stopExperiment() {
             // cancel any ongoing tests
             clearTimeout(testStimulusTimeout);
-            stimulusElement.style.visibility = 'hidden';
+            stimulusElement.style.display = 'none';
             stimulusIsVisible = false;
 
             // reset instruction and show results
             instruction.textContent = 'The experiment has concluded! Please copy the text block below this message and send it to us on WhatsApp!';
             showResults();
+            experimentActive = false;
+            experimentConcluded = true;
         }
 
         // Function to handle key press events
         document.addEventListener("keydown", function (event) {
+            if(!experimentActive || experimentConcluded) {
+                return;
+            }
             let category;
             // Check if d, f, or g is pressed
             switch (event.key) {
@@ -218,8 +240,16 @@
             // Check if the category of the displayed image matches the pressed key
             let currentImage = randomImageElement.src.split('/').pop();
             console.log(currentImage);
+            let wantedCategory;
+            if(currentImage.includes('german'.substr(0, 2))) {
+                wantedCategory = 'german';
+            } else if (currentImage.includes('chinese'.substr(0, 2))) {
+                wantedCategory = 'chinese';
+            } else {
+                wantedCategory = 'mexican';
+            }
             if (!stimulusIsVisible || !currentImage.includes(category.substr(0, 2))) {
-                mistakes[category]++;
+                mistakes[wantedCategory]++;
                 console.log('rejected ' + category + ', expected: ' + currentImage);
             } else {
                 recordStimulusReactionTime(category);
@@ -234,7 +264,7 @@
         window.addEventListener('keydown', (event) => {
             if (event.key === ' ') {
                 // the user pressed the space key
-                if (!experimentActive) {
+                if (!experimentActive && !experimentConcluded) {
                     // start the experiment if it wasn't active
                     startExperiment();
                     return;
